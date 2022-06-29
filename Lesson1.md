@@ -398,19 +398,260 @@ $
 
 ### 3.4. 多个例子中的向量化
 
+***如何向量化多个训练样本，并计算出结果***
+
+通过3.3的公式，重复计算m个训练样本
+
+- 通过训练样本$x^{(1)}$来预测$\hat y^{(1)}$
+- 通过训练样本$x^{(2)}$来预测$\hat y^{(2)}$
+- ...
+- 通过训练样本$x^{(m)}$来预测$\hat y^{(m)}$
+
+用激活函数的表示法就得到了：$a^{[2](1)}, a^{[2](2), a^{[2](3)}, ... a^{[2](m)}}$
+
+***用非向量法计算它预测值的公式：***
+
+$
+z^{[1](i)} = W^{[1](i)} x^{(i)} + b^{[1](i)}
+$
+
+$
+a^{[1](i)} = \sigma (z^{[1](i)})
+$
+
+$
+z^{[2](i)} = W^{[2](i)} a ^{[1](i)} + b^{[2](i)}
+$
+
+$
+a^{[2](i) = \sigma (z^{[2](i)})}
+$
+
+***向量化计算***
+
+先看它们的数据转换
+
+$
+x=\left[\begin{array}{cccc}
+\vdots & \vdots & \vdots & \vdots \\
+x^{[1]} & x^{[2]} & \cdots & x^{[m]} \\
+\vdots & \vdots & \vdots & \vdots \\
+\end{array}\right]
+$
+
+$
+Z^{[1]}=\left[\begin{array}{cccc}
+\vdots & \vdots & \vdots & \vdots \\
+z^{[1](1)} & z^{[1](2)} & \cdots & z^{[1](m)} \\
+\vdots & \vdots & \vdots & \vdots \\
+\end{array}\right]
+$
+
+$
+A^{[1]}=\left[\begin{array}{cccc}
+\vdots & \vdots & \vdots & \vdots \\
+a^{[1](1)} & a^{[1](2)} & \cdots & a^{[1](m)} \\
+\vdots & \vdots & \vdots & \vdots \\
+\end{array}\right]
+$
+
+$
+\left.\begin{array}{c}
+z^{[1](i)}=W^{[1](i)} x^{(i)}+b^{(1)} \\
+a^{[1](i)}=\sigma\left(z^{[1](i)}\right) \\
+z^{[2](i)}=W^{[2](i)} a^{[1](i)}+b^{(2)} \\
+a^{[2](i)}=\sigma\left(z^{[2](i)}\right)
+\end{array}\right\} \Rightarrow\left\{\begin{array}{c}
+A^{[1]}=\sigma\left(z^{[1]}\right) \\
+z^{[2]}=W^{[2]} A^{[1]}+b^{[2]} \\
+A^{[2]}=\sigma\left(z^{[2]}\right)
+\end{array}\right.
+$
+
 ### 3.5. 向量化实现的解释
+
+$
+W^{[1]}x=\left[\begin{array}{c}
+\cdots \\
+\cdots \\
+\cdots \\
+\end{array}\right]
+\left[\begin{array}{cccc}
+\vdots & \vdots & \vdots & \vdots \\
+x^{(1)} & x^{(2)} & x^{(3)} & \vdots \\
+\vdots & \vdots & \vdots & \vdots \\
+\end{array}\right]=
+\left[\begin{array}{cccc}
+\vdots & \vdots & \vdots & \vdots \\
+w^{(1)} x^{(1)} & w^{(1)} x^{(2)} & w^{(1)} x^{(3)} & \vdots \\
+\vdots & \vdots & \vdots & \vdots \\
+\end{array}\right]=
+\left[\begin{array}{cccc}
+\vdots & \vdots & \vdots & \vdots \\
+z^{[1](1)} & z^{[1](2)} & z^{[1](3)} & \vdots \\
+\vdots & \vdots & \vdots & \vdots \\
+\end{array}\right]=
+Z^{[1]}
+$
 
 ### 3.6. 激活函数
 
+二分用sigmoid(但是tanh函数优于它，就是sigmoid的一个变型)，其他不知道了就用relu
+
 ### 3.7. 为什么需要非线性激活函数
+
+如果每层间不使用不定状态的激活函数，那么无论神经网络有多少层都只是简单的线性组合而已。
 
 ### 3.8. 激活函数的导数
 
+求导目的是为了找最小值，它作用于反向传播
+
+***sigmoid***
+
+![Sigmoid](MD/assert/Lesson1-3-8-1.png)
+
+求导公式：
+
+$
+\frac{d}{dz} g(z) = \frac{1}{1+e^{-z}}(1-\frac{1}{1+e^{-z}}) = g(z)(1-g(z))
+$
+
+- 当z=10或z=-10，结果约为0
+- 当z=0，结果为$\frac{1}{4}$
+
+在神经网络中，a=g(z)
+
+$
+{g(z)}' = \frac{d}{dz}g(z) = a(1-a)
+$
+
+***Tanh***
+
+![Tanh](MD/assert/Lseeon1-3-8-2.png)
+
+$
+g(z) = tanh(z)=\frac{e^z-e^{-z}}{e^z+e^{-z}}
+$
+
+$
+\frac{d}{dz}g(z) = 1-(tanh(z))^2
+$
+
+- 当z=10或z=-10，结果为0
+- 当z=0，结果为1
+
+在神经网络中，a=g(z)
+
+$
+{g(z)}' = \frac{d}{dz}g(z) = 1-a^2
+$
+
+***ReLU***
+
+![ReLU](MD/assert/Lesson1-3-8-3.png)
+
+$
+g(z) = max(0.001z,z)
+$
+
+$
+{g(z)}'=
+\left\{\begin{array}{ccc}
+0.01 & if & z<0 \\
+1 & if & z>0 \\
+undefined & if & z=0 \\
+\end{array}\right.
+$
+
 ### 3.9. 神经网络的梯度下降法
+
+梯度下降目的是为了找到合适的参数，将损失函数收敛到最小值，它是进行在反向传播中的。
+
+神经网络的成本函数(二分类):
+
+$$
+J(W^{[1]}, b^{[1]}, W^{[2]}, b^{[2]}) = \frac{1}{m} \sum_{m}^{i=1}L(\hat y,y)
+$$
+
+训练参数需要进行梯度下降，在训练神经网络的时候(随机初始化参数很重要)，每次梯度下降都会计算一下预测值：$\hat y, (i=1,2,3,...,m)$
+
+$
+dW^{[1]} = \frac{dJ}{dW^{[1]}},db^{[1]} = \frac{dJ}{db^{[1]}}
+$
+
+$
+dW^{[2]} = \frac{dJ}{dW^{[2]}},db^{[2]} = \frac{dJ}{db^{[2]}}
+$
+
+$
+W^{[1]} \Rightarrow W^{[1]} - \alpha dW^{[1]},b^{[1]} \Rightarrow b^{[1]}-\alpha db^{[1]}
+$
+
+$
+W^{[2]} \Rightarrow W^{[2]} - \alpha dW^{[2]},b^{[2]} \Rightarrow b^{[2]}-\alpha db^{[2]}
+$
+
+***正向传播***
+
+$
+z^{[1]} = W^{[1]}x+b^{[1]}
+$
+
+$
+a^{[1]} = \sigma (z^{[1]})
+$
+
+$
+z^{[2]} = W^{[2]} a^{[1]} + b^{[2]}
+$
+
+$
+a^{[2]} = g^{[2]}(z^{[2]})=\sigma (z^{[2]})
+$
+
+***反向传播***
+
+$
+dz^{[2]} = A^{[2]} - Y, Y =\left[\begin{array}{cccc}
+y^{[1]} & y^{[2]} & \cdots & y^{[m]} \\
+\end{array}\right]
+$
+
+$
+dW^{[2]} = \frac{1}{m}dz^{[2]}A^{[1]T}
+$
+
+$
+db^{[2]} = \frac{1}{m}np.sum(dz^{[2]},axis=1,keepdims=True)
+$
+
+$
+dz^{[1]}=\underbrace{W^{[2]T}dz^{[2]}}_{(n^{[1]},m)}*\underbrace{{g^{[1]}}'}_{\begin{matrix}activation & function & of & hidden & layer\end{matrix}}*\underbrace{(z^{[1]})}_{(n^{[1]},m)}
+$
+
+$
+dW^{[1]} = \frac{1}{m}dz^{[1]}x^T
+$
+
+$
+\underbrace{db^{[1]}}_{} = \frac{1}{m}np.sum(dz^{{1}},axis=1,keepdims=True)
+$
 
 ### 3.10. 只管理解反向传播
 
 ### 3.11. 随机初始化
+
+对于一个神经网络，权重随机初始化很重要(不可以初始化为0，这样会导致网络失效)
+
+$$
+W^{[1]}=np.random.randn(2,2)*0.01,b^{[1]}=np.zeros((2,1))
+$$
+
+w的结果要乘0.01，是为了让w的值尽可能小，进而使得a的值尽可能小，z尽可能的小，使得激活函数在不饱和的位置。
+
+$$
+W^{[2]}=np.random.rand(2,2)*0.01,b^{[2]}=0
+$$
 
 ### 3.12. 总结习题
 
@@ -420,15 +661,131 @@ $
 
 ### 4.2. 深层网络中的前向传播
 
+就是比之前的层数多了一些
+
+$$
+z^{[l]}=w^{[l]}a^{[l-1]}+b^{[l]},a^{[l]}=g^{[l]}(z^{[l]})
+$$
+
+- l表示层数
+
+向量化的过程可以写为：
+
+$$
+Z^{[l]}=W^{[l]}A^{[l-1]}+b^{[l]},A^{[l]}=g^{[l]}(Z^{[l]}),(A^{[0]}=X)
+$$
+
+- $A^{[0]}$就是输入的训练样本
+
 ### 4.3. 核对矩阵的维度
 
 ### 4.4. 为什么使用深层表示
 
+以人脸识别为例：
+
+- 第一层会检测边缘，这是整个图片中很小的一块
+- 第二层会将边缘拼接成眼睛、鼻子、嘴巴等器官
+- 第三层会将上层的器官连接起来形成区域
+- 最后将它得到最终的脸
+
+当然，这只是为了便于理解才这样描述，真正的识别更加复杂。
+
+它是通过一层层的将信息更加形象，每一块的特征进行区分
+
 ### 4.5. 搭建深层神经网络模块
+
+![前向传播与反向传播](MD/assert/Lesson1-4-5.png)
+这是很好理解参数更新的图片
+
+- 最上面一行是前向传播
+  - 它通过输入特征$a^{[0]}$以及内部的参数$w,b$来得到最终的$\hat y$
+  - 它每一步都会将$z^{[l]}$保存在cache中
+    - 这里既然有最后的$\hat y$为什么还要保存$z^{[l]}$呢？因为每次都使用激活函数，导致下一步参与的$a^{[l]}$与上一步得到的$z^{[l]}$不一样
+- 下面是反向传播
+  - 它通过最终的$\hat y$以及cache保存的$z^{[l]}$来得到$dw^{[l]}，db^{[l]}$
+  - 再通过$w^{[l]}:=w^{[l]}-\alpha dw^{[l]},b^{[l]}:=b^{[l]}-\alpha db^{[l]}$来更新参数
+  - $\alpha$是学习率
+- 通过一遍遍的正向传播与反向传播得到最适合的参数
 
 ### 4.6. 前向和反向传播
 
+***前向传播***
+
+Input $a^{[l-1]}$ Output $a^{[l]}$,cache($z^{[l]}$)(缓存$w^{[l]},b^{[l]}$的效果也是一样的)
+
+更新的函数：
+
+输入$a^{[0]}$
+
+$
+z^{[l]}=w^{[l]}a^{{l-1}}+b^{[l]}
+$
+
+$
+a^{[l]}=g^{[l]}(z^{[l]})
+$
+
+向量化过程：
+
+输入$A^{[0]}$
+
+$
+Z^{[l]}=W^{[l]}A^{[l-1]}+b^{[l]}
+$
+
+$
+A^{[l]}=g^{[l]}(Z^{[l]})
+$
+
+***反向传播***
+
+Input $da^{[l]}$ Output $da^{[l-1]},dW^{[l]},db^{[l]}$
+
+更新所需的函数：
+
+$
+dz^{[l]}=da^{[l]}{g^{[l]}}'(z^{[l]})
+$
+
+$
+dW^{[l]}=dz^{[l]}a^{[l-1]}
+$
+
+$
+db^{[l]}=dz^{[l]}
+$
+
+$
+da^{[l-1]}=W^{[l]T}dz^{[l]}
+$
+
+向量化版本：
+
+$
+dZ^{[l]}=dA^{[l]}{g^{[l]}}'(Z^{[l]})
+$
+
+$
+dW^{[l]}=dZ^{[l]}A^{[l-1]}
+$
+
+$
+db^{[l]}=\frac{1}{m}np.sum(dz^{[l]},axis=1,keepdims=True)
+$
+
+$
+dA^{[l-1]}=W^{[l]T}dZ^{[l]}
+$
+
 ### 4.7. 参数 vs 超参数
+
+什么是超参数呢？
+
+算法中的学习率、梯度下降法循环的数量、隐藏层数目、隐藏层单元数目、激活函数的选择...
+
+这些需要你来设置，并且最后实际上是控制参数W和b的值。
+
+超参数是想得到最优的参数，那么怎么得到最优的超参数呢？调参侠了
 
 ### 4.8. 这和大脑有什么关系
 
